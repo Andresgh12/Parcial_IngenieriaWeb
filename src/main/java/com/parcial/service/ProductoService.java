@@ -2,7 +2,10 @@ package com.parcial.service;
 
 import com.parcial.model.Producto;
 import com.parcial.repository.ProductoRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -38,5 +41,10 @@ public class ProductoService {
 
     public void eliminar(Long id) {
         repository.deleteById(id);
+    }
+
+    // NUEVO: Método para paginación
+    public Page<Producto> obtenerTodosPaginados(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 }

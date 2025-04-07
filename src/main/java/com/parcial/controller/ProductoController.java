@@ -2,8 +2,14 @@ package com.parcial.controller;
 
 import com.parcial.model.Producto;
 import com.parcial.service.ProductoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -41,5 +47,37 @@ public class ProductoController {
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // NUEVO: Endpoint para paginación
+    @GetMapping("/paginado")
+    public ResponseEntity<?> getAllProductosPaginados(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "nombre,asc") String[] sort
+    ) {
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by(parseSort(sort)));
+            Page<Producto> productosPage = service.obtenerTodosPaginados(pageable);
+            return ResponseEntity.ok(productosPage);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Dirección de orden inválida. Use 'asc' o 'desc'.");
+        }
+    }
+
+    // Método auxiliar para parsear los parámetros de ordenación
+    private List<Sort.Order> parseSort(String[] sortParams) {
+        List<Sort.Order> orders = new ArrayList<>();
+        for (String param : sortParams) {
+            String[] parts = param.split(",");
+            if (parts.length == 2) {
+                String field = parts[0];
+                Sort.Direction direction = Sort.Direction.fromString(parts[1]);
+                orders.add(new Sort.Order(direction, field));
+            } else {
+                throw new IllegalArgumentException("Parámetro de orden inválido: " + param);
+            }
+        }
+        return orders;
     }
 }
