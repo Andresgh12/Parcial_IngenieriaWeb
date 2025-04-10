@@ -65,14 +65,14 @@ public class ProductoController {
         }
     }
 
-    // Método auxiliar para parsear los parámetros de ordenación
     private List<Sort.Order> parseSort(String[] sortParams) {
         List<Sort.Order> orders = new ArrayList<>();
         for (String param : sortParams) {
             String[] parts = param.split(",");
             if (parts.length == 2) {
-                String field = parts[0];
-                Sort.Direction direction = Sort.Direction.fromString(parts[1]);
+                String field = parts[0].trim();
+                String directionStr = parts[1].trim().toUpperCase();
+                Sort.Direction direction = Sort.Direction.fromString(directionStr);
                 orders.add(new Sort.Order(direction, field));
             } else {
                 throw new IllegalArgumentException("Parámetro de orden inválido: " + param);
@@ -80,4 +80,5 @@ public class ProductoController {
         }
         return orders;
     }
+
 }
